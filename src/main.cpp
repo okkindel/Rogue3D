@@ -18,7 +18,7 @@ const int texture_wall_size = 128;
 // time between FPS text refresh. FPS is smoothed out over this time
 const float fps_refresh_time = 0.05;
 
-int main()
+int renderer()
 {
 
     // if the map is not correct, we can have segmentation faults. So check it.
@@ -69,7 +69,8 @@ int main()
     // lines used to draw walls and floors on the screen
     sf::VertexArray lines(sf::Lines, 18 * screenWidth);
 
-    sf::Text fpsText("", font, 50);               // text object for FPS counter
+    sf::Text fpsText("", font, 50); // text object for FPS counter
+    fpsText.setPosition(screenWidth - 250, 10);
     sf::Clock clock;                              // timer
     char frameInfoString[sizeof("FPS: *****.*")]; // string buffer for frame information
 
@@ -251,7 +252,7 @@ int main()
 
                 wallHeight = screenHeight / distance;
 
-                sf::Color cell_color = sf::Color::White;
+                sf::Color cell_color = sf::Color::Green;
                 cell_color.r /= distance;
                 cell_color.g /= distance;
                 cell_color.b /= distance;
@@ -329,13 +330,36 @@ int main()
                 color,
                 sf::Vector2f((float)texture_coords.x, (float)(texture_coords.y + texture_wall_size - 1))));
         }
-
         window.clear();
         window.draw(lines, state);
+
+        // draw minimap
+        sf::RectangleShape rectangle;
+        rectangle.setSize(sf::Vector2f(8, 8));
+        rectangle.setFillColor(sf::Color::Black);
+        for (int i = 0; i < mapHeight; i++)
+        {
+            for (int j = 0; j < mapWidth; j++)
+            {
+                rectangle.setPosition(10 + j * 8, 10 + i * 8);
+                if (getTile(j, i) != '.')
+                    window.draw(rectangle);
+            }
+        }
+        rectangle.setFillColor(sf::Color::White);
+        rectangle.setSize(sf::Vector2f(5, 5));
+        rectangle.setPosition(10 + position.x * 7.75, 10 + position.y * 7.75);
+        window.draw(rectangle);
+
         window.draw(fpsText);
         frame_time_micro += clock.getElapsedTime().asMicroseconds();
         window.display();
     }
 
     return EXIT_SUCCESS;
+}
+
+int main()
+{
+    renderer();
 }
