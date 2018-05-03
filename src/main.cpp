@@ -130,57 +130,53 @@ int renderer()
             using kb = sf::Keyboard;
 
             // moving forward or backwards (1.0 or -1.0)
-            float moveForward = 0.0f;
-            bool horizontal = false;
-
-            if (kb::isKeyPressed(kb::LShift))
-            {
-                horizontal = true;
-            }
-
-            // get input
-            if (kb::isKeyPressed(kb::Up))
-            {
-                moveForward = 1.0f;
-            }
-            else if (kb::isKeyPressed(kb::Down))
-            {
-                moveForward = -1.0f;
-            }
-
-            // handle movement
-            if (moveForward != 0.0f)
-            {
-                if (!horizontal)
-                {
-                    sf::Vector2f moveVec = direction * moveSpeed * moveForward * dt;
-
-                    if (canMove(sf::Vector2f(position.x + moveVec.x, position.y), size))
-                        position.x += moveVec.x;
-                    if (canMove(sf::Vector2f(position.x, position.y + moveVec.y), size))
-                        position.y += moveVec.y;
-                }
-            }
-
+            float moveDirection = 0.0f;
             // rotating rightwards or leftwards(1.0 or -1.0)
             float rotateDirection = 0.0f;
+            // vertical move or shifted
+            bool vertical = true;
 
-            // get input
             if (kb::isKeyPressed(kb::Left))
-            {
                 rotateDirection = -1.0f;
-            }
             else if (kb::isKeyPressed(kb::Right))
-            {
                 rotateDirection = 1.0f;
+            if (kb::isKeyPressed(kb::LShift))
+                vertical = false;
+            if (kb::isKeyPressed(kb::Up))
+                moveDirection = 1.0f;
+            else if (kb::isKeyPressed(kb::Down))
+                moveDirection = -1.0f;
+
+            // handle movement
+            if (moveDirection != 0.0f && vertical)
+            {
+                sf::Vector2f moveVec = direction * moveSpeed * moveDirection * dt;
+
+                if (canMove(sf::Vector2f(position.x + moveVec.x, position.y), size))
+                    position.x += moveVec.x;
+                if (canMove(sf::Vector2f(position.x, position.y + moveVec.y), size))
+                    position.y += moveVec.y;
             }
 
             // handle rotation
             if (rotateDirection != 0.0f)
             {
-                float rotation = rotateSpeed * rotateDirection * dt;
-                direction = rotateVec(direction, rotation);
-                plane = rotateVec(plane, rotation);
+                    float rotation = rotateSpeed * rotateDirection * dt;
+                if (vertical)
+                {
+                    direction = rotateVec(direction, rotation);
+                    plane = rotateVec(plane, rotation);
+                }
+                else
+                {
+                    sf::Vector2f dir = rotateVec(direction, rotation + M_PI / 2);
+                    sf::Vector2f moveVec = dir * moveSpeed * rotateDirection * dt;
+                    
+                    if (canMove(sf::Vector2f(position.x + moveVec.x, position.y), size))
+                        position.x += moveVec.x;
+                    if (canMove(sf::Vector2f(position.x, position.y + moveVec.y), size))
+                        position.y += moveVec.y;
+                }
             }
         }
 
