@@ -46,6 +46,7 @@ int renderer()
     sf::RenderStates state(&texture);
 
     // player
+    float look_dir = 0;
     sf::Vector2f position(15.5f, 16.5f); // coordinates in worldMap
     sf::Vector2f direction(0.0f, 1.0f);  // direction, relative to (0,0)
     sf::Vector2f plane(-0.66f, 0.0f);    // 2d raycaster version of the camera plane,
@@ -57,7 +58,7 @@ int renderer()
     sf::Vector2f size(size_f, size_f); // player collision box width and height, derived from size_f
 
     // create window
-    sf::RenderWindow window(sf::VideoMode(screenWidth + 1, screenHeight), "Roguelike");
+    sf::RenderWindow window(sf::VideoMode(screenWidth, screenHeight), "Roguelike");
     window.setSize(sf::Vector2u(screenWidth, screenHeight)); // why add +1 and then set the size correctly?
                                                              // Fixes some problem with the viewport. If you
                                                              // don't do it, you'll see lots of gaps. Maybe
@@ -67,7 +68,9 @@ int renderer()
     bool hasFocus = true;
 
     // lines used to draw walls and floors on the screen
-    sf::VertexArray lines(sf::Lines, 18 * screenWidth);
+    sf::VertexArray lines(sf::Lines);
+    // lines of minimap
+    sf::VertexArray minilines(sf::Lines);
 
     sf::Text fpsText("", font, 50); // text object for FPS counter
     fpsText.setPosition(screenWidth - 250, 10);
@@ -166,6 +169,7 @@ int renderer()
             // handle rotation
             if (rotateDirection != 0.0f)
             {
+                look_dir += (rotateSpeed * rotateDirection * dt) * 60;
                 float rotation = rotateSpeed * rotateDirection * dt;
                 direction = rotateVec(direction, rotation);
                 plane = rotateVec(plane, rotation);
@@ -252,23 +256,26 @@ int renderer()
 
                 wallHeight = screenHeight / distance;
 
-                sf::Color cell_color = sf::Color::Green;
+                sf::Color cell_color = sf::Color::White;
                 cell_color.r /= distance;
                 cell_color.g /= distance;
                 cell_color.b /= distance;
 
                 // add floor
-                lines.append(sf::Vertex(sf::Vector2f((float)x, (float)groundPixel), cell_color, sf::Vector2f(60.0f, 60.0f)));
+                lines.append(sf::Vertex(sf::Vector2f((float)x, (float)groundPixel), cell_color));
                 groundPixel = int(wallHeight * cameraHeight + screenHeight * 0.5f);
-                lines.append(sf::Vertex(sf::Vector2f((float)x, (float)groundPixel), cell_color, sf::Vector2f(60.0f, 60.0f)));
+                lines.append(sf::Vertex(sf::Vector2f((float)x, (float)groundPixel), cell_color));
 
                 // add ceiling
-                lines.append(sf::Vertex(sf::Vector2f((float)x, (float)ceilingPixel), cell_color, sf::Vector2f(385.0f, 129.0f)));
+                lines.append(sf::Vertex(sf::Vector2f((float)x, (float)ceilingPixel), cell_color));
                 ceilingPixel = int(-wallHeight * (1.0f - cameraHeight) + screenHeight * 0.5f);
-                lines.append(sf::Vertex(sf::Vector2f((float)x, (float)ceilingPixel), cell_color, sf::Vector2f(385.0f, 129.0f)));
+                lines.append(sf::Vertex(sf::Vector2f((float)x, (float)ceilingPixel), cell_color));
 
                 tile = getTile(mapPos.x, mapPos.y);
             }
+
+            minilines.append(sf::Vertex(sf::Vector2f(12.5 + rayPos.x * 7.9, 12.5 + rayPos.y * 7.9)));
+            minilines.append(sf::Vertex(sf::Vector2f(12.5 + (rayPos.x + distance * rayDir.x) * 7.9, 12.5 + (rayPos.y + distance * rayDir.y) * 7.9)));
 
             // calculate lowest and highest pixel to fill in current line
             int drawStart = ceilingPixel;
@@ -348,8 +355,11 @@ int renderer()
         }
         rectangle.setFillColor(sf::Color::White);
         rectangle.setSize(sf::Vector2f(5, 5));
-        rectangle.setPosition(10 + position.x * 7.75, 10 + position.y * 7.75);
+        rectangle.setPosition(10 + position.x * 7.9, 10 + position.y * 7.9);
         window.draw(rectangle);
+
+        window.draw(minilines);
+        minilines.clear();
 
         window.draw(fpsText);
         frame_time_micro += clock.getElapsedTime().asMicroseconds();
