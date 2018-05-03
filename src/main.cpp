@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <math.h>
-#include <unordered_map>
 #include <SFML/Graphics.hpp>
+#include "Player.h"
 
 const int screenWidth = 1280;
 const int screenHeight = 768;
@@ -20,65 +20,6 @@ const int map_scale = 8;
 // colors
 const sf::Color transparent_white(255, 255, 255, 125);
 const sf::Color color_brick(85, 55, 50);
-
-// list of wall texture types, in order as they appear in the full texture
-enum class WallTexture
-{
-    Wall,
-    Bush,
-    Door
-};
-
-// valid wall types and their texture for the world map
-const std::unordered_map<char, WallTexture> wallTypes{
-    {'1', WallTexture::Wall},
-    {'2', WallTexture::Bush},
-    {'3', WallTexture::Door},
-};
-
-// size of the top-down world map in tiles
-const int mapWidth = 32;
-const int mapHeight = 32;
-
-const char worldMap[] =
-    "11111111111111111111111111111111"
-    "1.1..1..3..3..1..11.1.11..11.1.1"
-    "1.1.11.11..11.1..1..1..1..1..1.1"
-    "1111.......1..1.111...111.1..1.1"
-    "1.1.11..11.1..11.1....11.1111111"
-    "1111111.1.111.1.....11....1..1.1"
-    "1111....11.1..1..1..1..1..1..1.1"
-    "1.1..1.....1..1.111111...121.1.1"
-    "1.1.....11......11111.113.11...1"
-    "1.1..1..1..11.1..1.111.1.....111"
-    "1.1..1.121....1.111112111......1"
-    "1112...11..11.1..1....11..11.1.1"
-    "1....1.....1.111.......1..1..111"
-    "1.1..1.11.111...11..11...11.1111"
-    "1.1..1..1........1..1.......1111"
-    "1.1..11.2..1..1..11....2.....111"
-    "1....1.111.1..1.....1..1.111.1.1"
-    "1.1..11.1.111.1..11.1..1..1..1.1"
-    "1.1.....1.111.1.111.1.111....2.1"
-    "1.1.11.111111....11...111...1111"
-    "1.1..1.111111.1..1..1..1..1....1"
-    "1.3..1.111.1..1.111.1..1....2111"
-    "1111...111.31....1.111.1.111.111"
-    "1.1.....1.......11.111.1..1.1111"
-    "1.1..1.111...111.1.1111131111111"
-    "1111111....11....1....111.1....1"
-    "1.3..1.....11.1.....1..1..1..1.1"
-    "1....11...111111......111.1..1.1"
-    "1.1.111...121....11....1..11.1.1"
-    "1....11.1..1..1........1.......1"
-    "1111111.1....111...22.111....1.1"
-    "11111111111111111111111111111111";
-
-// get a tile from worldMap. Not memory safe.
-char getTile(int x, int y)
-{
-    return worldMap[y * mapWidth + x];
-}
 
 // checks worldMap for errors
 // returns: true on success, false on errors found
@@ -115,41 +56,6 @@ bool checkMap()
     return true;
 }
 
-
-// check if a rectangular thing with given size can move to given position without colliding with walls or
-// being outside of the map
-// position is considered the middle of the rectangle
-bool canMove(sf::Vector2f position, sf::Vector2f size)
-{
-    // create the corners of the rectangle
-    sf::Vector2i upper_left(position - size / 2.0f);
-    sf::Vector2i lower_right(position + size / 2.0f);
-    if (upper_left.x < 0 || upper_left.y < 0 || lower_right.x >= mapWidth || lower_right.y >= mapHeight)
-    {
-        return false; // out of map bounds
-    }
-    // loop through each map tile within the rectangle. The rectangle could be multiple tiles in size!
-    for (int y = upper_left.y; y <= lower_right.y; ++y)
-    {
-        for (int x = upper_left.x; x <= lower_right.x; ++x)
-        {
-            if (getTile(x, y) != '.')
-            {
-                return false;
-            }
-        }
-    }
-    return true;
-}
-
-// rotate a given vector with given float value in radians and return the result
-sf::Vector2f rotateVec(sf::Vector2f vec, float value)
-{
-    return sf::Vector2f(
-        vec.x * std::cos(value) - vec.y * std::sin(value),
-        vec.x * std::sin(value) + vec.y * std::cos(value));
-}
-
 int renderer()
 {
 
@@ -176,17 +82,6 @@ int renderer()
 
     // render state that uses the texture
     sf::RenderStates state(&texture);
-
-    // player
-    sf::Vector2f position(15.5f, 16.5f); // coordinates in worldMap
-    sf::Vector2f direction(0.0f, 1.0f);  // direction, relative to (0,0)
-    sf::Vector2f plane(-0.66f, 0.0f);    // 2d raycaster version of the camera plane,
-                                         // must be perpendicular to rotation
-    float size_f = 0.375f;               // dimensions of player collision box, in tiles
-    float moveSpeed = 3.5f;              // player movement speed in tiles per second
-    float rotateSpeed = 2.0f;            // player rotation speed in radians per second
-
-    sf::Vector2f size(size_f, size_f); // player collision box width and height, derived from size_f
 
     // create window
     sf::RenderWindow window(sf::VideoMode(screenWidth, screenHeight), "Roguelike");
@@ -253,57 +148,7 @@ int renderer()
         // handle keyboard input
         if (hasFocus)
         {
-            using kb = sf::Keyboard;
-
-            // moving forward or backwards (1.0 or -1.0)
-            float moveDirection = 0.0f;
-            // rotating rightwards or leftwards(1.0 or -1.0)
-            float rotateDirection = 0.0f;
-            // vertical move or shifted
-            bool vertical = true;
-
-            if (kb::isKeyPressed(kb::Left))
-                rotateDirection = -1.0f;
-            else if (kb::isKeyPressed(kb::Right))
-                rotateDirection = 1.0f;
-            if (kb::isKeyPressed(kb::LShift))
-                vertical = false;
-            if (kb::isKeyPressed(kb::Up))
-                moveDirection = 1.0f;
-            else if (kb::isKeyPressed(kb::Down))
-                moveDirection = -1.0f;
-
-            // handle movement
-            if (moveDirection != 0.0f && vertical)
-            {
-                sf::Vector2f moveVec = direction * moveSpeed * moveDirection * dt;
-
-                if (canMove(sf::Vector2f(position.x + moveVec.x, position.y), size))
-                    position.x += moveVec.x;
-                if (canMove(sf::Vector2f(position.x, position.y + moveVec.y), size))
-                    position.y += moveVec.y;
-            }
-
-            // handle rotation
-            if (rotateDirection != 0.0f)
-            {
-                    float rotation = rotateSpeed * rotateDirection * dt;
-                if (vertical)
-                {
-                    direction = rotateVec(direction, rotation);
-                    plane = rotateVec(plane, rotation);
-                }
-                else
-                {
-                    sf::Vector2f dir = rotateVec(direction, rotation + M_PI / 2);
-                    sf::Vector2f moveVec = dir * moveSpeed * rotateDirection * dt;
-                    
-                    if (canMove(sf::Vector2f(position.x + moveVec.x, position.y), size))
-                        position.x += moveVec.x;
-                    if (canMove(sf::Vector2f(position.x, position.y + moveVec.y), size))
-                        position.y += moveVec.y;
-                }
-            }
+            handleMove(dt);
         }
 
         lines.resize(0);
@@ -314,8 +159,8 @@ int renderer()
 
             // ray to emit
             float cameraX = 2 * x / (float)screenWidth - 1.0f; // x in camera space (between -1 and +1)
-            sf::Vector2f rayPos = position;
-            sf::Vector2f rayDir = direction + plane * cameraX;
+            sf::Vector2f rayPos = getPosition();
+            sf::Vector2f rayDir = getDirection() + getPlane() * cameraX;
 
             // NOTE: with floats, division by zero gives you the "infinity" value. This code depends on this.
 
@@ -512,7 +357,8 @@ int renderer()
         rectangle.setFillColor(sf::Color::White);
         // not very accurate values but less of math
         rectangle.setSize(sf::Vector2f((map_scale - 3), (map_scale - 3)));
-        rectangle.setPosition(10 + position.x * (map_scale - 0.1), 10 + position.y * (map_scale - 0.1));
+        sf::Vector2f pos = getPosition();
+        rectangle.setPosition(10 + pos.x * (map_scale - 0.1), 10 + pos.y * (map_scale - 0.1));
         window.draw(rectangle);
 
         frame_time_micro += clock.getElapsedTime().asMicroseconds();

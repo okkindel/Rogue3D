@@ -2,7 +2,7 @@ CXX = c++
 CFLAGS += -std=c++11
 LDFLAGS += $(shell pkg-config --libs sfml-all)
 
-SRC = $(wildcard src/main.cpp)
+SRC = $(wildcard src/*.cpp)
 HEADERS = $(wildcard src/*.h)
 OBJ = $(SRC:.cpp=.o)
 
