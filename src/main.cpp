@@ -20,6 +20,10 @@ const float fps_refresh_time = 0.05;
 // minimap scale
 const int map_scale = 8;
 
+// colors
+const sf::Color transparent_white(255, 255, 255, 125);
+const sf::Color color_brick(85, 55, 50);
+
 int renderer()
 {
 
@@ -265,15 +269,15 @@ int renderer()
                 cell_color.g /= distance;
                 cell_color.b /= distance;
 
-                sf::Color brick(85, 55, 50);
-                brick.r /= distance;
-                brick.g /= distance;
-                brick.b /= distance;
+                sf::Color floor_color = color_brick;
+                floor_color.r /= distance;
+                floor_color.g /= distance;
+                floor_color.b /= distance;
 
                 // add floor
-                floorlines.append(sf::Vertex(sf::Vector2f((float)x, (float)groundPixel), brick));
+                floorlines.append(sf::Vertex(sf::Vector2f((float)x, (float)groundPixel), floor_color));
                 groundPixel = int(wallHeight * cameraHeight + screenHeight * 0.5f);
-                floorlines.append(sf::Vertex(sf::Vector2f((float)x, (float)groundPixel), brick));
+                floorlines.append(sf::Vertex(sf::Vector2f((float)x, (float)groundPixel), floor_color));
 
                 // add ceiling
                 floorlines.append(sf::Vertex(sf::Vector2f((float)x, (float)ceilingPixel), cell_color));
@@ -289,7 +293,7 @@ int renderer()
                                        sf::Color::Green));
             maplines.append(sf::Vertex(sf::Vector2f(10 + (map_scale - 3) / 2 + (rayPos.x + distance * rayDir.x) * (map_scale - 0.1),
                                                     10 + (map_scale - 3) / 2 + (rayPos.y + distance * rayDir.y) * (map_scale - 0.1)),
-                                       sf::Color::White));
+                                       sf::Color::Black));
 
             // calculate lowest and highest pixel to fill in current line
             int drawStart = ceilingPixel;
@@ -364,14 +368,21 @@ int renderer()
         // draw minimap
         sf::RectangleShape rectangle;
         rectangle.setSize(sf::Vector2f(map_scale, map_scale));
-        rectangle.setFillColor(sf::Color::Black);
         for (int i = 0; i < mapHeight; i++)
         {
             for (int j = 0; j < mapWidth; j++)
             {
                 rectangle.setPosition(10 + j * map_scale, 10 + i * map_scale);
                 if (getTile(j, i) != '.')
+                {
+                    rectangle.setFillColor(sf::Color::Black);
                     window.draw(rectangle);
+                }
+                else
+                {
+                    rectangle.setFillColor(transparent_white);
+                    window.draw(rectangle);
+                }
             }
         }
 
@@ -385,7 +396,7 @@ int renderer()
         frame_time_micro += clock.getElapsedTime().asMicroseconds();
         window.display();
     }
-    
+
     return EXIT_SUCCESS;
 }
 
