@@ -17,6 +17,8 @@ const int texture_size = 512;
 const int texture_wall_size = 128;
 // time between FPS text refresh. FPS is smoothed out over this time
 const float fps_refresh_time = 0.05;
+// minimap scale
+const int map_scale = 8;
 
 int renderer()
 {
@@ -46,31 +48,29 @@ int renderer()
     sf::RenderStates state(&texture);
 
     // player
-    float look_dir = 0;
     sf::Vector2f position(15.5f, 16.5f); // coordinates in worldMap
     sf::Vector2f direction(0.0f, 1.0f);  // direction, relative to (0,0)
     sf::Vector2f plane(-0.66f, 0.0f);    // 2d raycaster version of the camera plane,
                                          // must be perpendicular to rotation
     float size_f = 0.375f;               // dimensions of player collision box, in tiles
     float moveSpeed = 3.5f;              // player movement speed in tiles per second
-    float rotateSpeed = 3.0f;            // player rotation speed in radians per second
+    float rotateSpeed = 2.0f;            // player rotation speed in radians per second
 
     sf::Vector2f size(size_f, size_f); // player collision box width and height, derived from size_f
 
     // create window
     sf::RenderWindow window(sf::VideoMode(screenWidth, screenHeight), "Roguelike");
-    window.setSize(sf::Vector2u(screenWidth, screenHeight)); // why add +1 and then set the size correctly?
-                                                             // Fixes some problem with the viewport. If you
-                                                             // don't do it, you'll see lots of gaps. Maybe
-                                                             // there's a better fix.
+    window.setSize(sf::Vector2u(screenWidth, screenHeight));
 
     window.setFramerateLimit(60);
     bool hasFocus = true;
 
-    // lines used to draw walls and floors on the screen
+    // lines used to draw walls on the screen
     sf::VertexArray lines(sf::Lines);
     // lines of minimap
-    sf::VertexArray minilines(sf::Lines);
+    sf::VertexArray maplines(sf::Lines);
+    // lines of cellings and flores
+    sf::VertexArray floorlines(sf::Lines);
 
     sf::Text fpsText("", font, 50); // text object for FPS counter
     fpsText.setPosition(screenWidth - 250, 10);
@@ -127,6 +127,12 @@ int renderer()
 
             // moving forward or backwards (1.0 or -1.0)
             float moveForward = 0.0f;
+            bool horizontal = false;
+
+            if (kb::isKeyPressed(kb::LShift))
+            {
+                horizontal = true;
+            }
 
             // get input
             if (kb::isKeyPressed(kb::Up))
@@ -141,15 +147,14 @@ int renderer()
             // handle movement
             if (moveForward != 0.0f)
             {
-                sf::Vector2f moveVec = direction * moveSpeed * moveForward * dt;
+                if (!horizontal)
+                {
+                    sf::Vector2f moveVec = direction * moveSpeed * moveForward * dt;
 
-                if (canMove(sf::Vector2f(position.x + moveVec.x, position.y), size))
-                {
-                    position.x += moveVec.x;
-                }
-                if (canMove(sf::Vector2f(position.x, position.y + moveVec.y), size))
-                {
-                    position.y += moveVec.y;
+                    if (canMove(sf::Vector2f(position.x + moveVec.x, position.y), size))
+                        position.x += moveVec.x;
+                    if (canMove(sf::Vector2f(position.x, position.y + moveVec.y), size))
+                        position.y += moveVec.y;
                 }
             }
 
@@ -169,7 +174,6 @@ int renderer()
             // handle rotation
             if (rotateDirection != 0.0f)
             {
-                look_dir += (rotateSpeed * rotateDirection * dt) * 60;
                 float rotation = rotateSpeed * rotateDirection * dt;
                 direction = rotateVec(direction, rotation);
                 plane = rotateVec(plane, rotation);
@@ -261,21 +265,31 @@ int renderer()
                 cell_color.g /= distance;
                 cell_color.b /= distance;
 
+                sf::Color brick(85, 55, 50);
+                brick.r /= distance;
+                brick.g /= distance;
+                brick.b /= distance;
+
                 // add floor
-                lines.append(sf::Vertex(sf::Vector2f((float)x, (float)groundPixel), cell_color));
+                floorlines.append(sf::Vertex(sf::Vector2f((float)x, (float)groundPixel), brick));
                 groundPixel = int(wallHeight * cameraHeight + screenHeight * 0.5f);
-                lines.append(sf::Vertex(sf::Vector2f((float)x, (float)groundPixel), cell_color));
+                floorlines.append(sf::Vertex(sf::Vector2f((float)x, (float)groundPixel), brick));
 
                 // add ceiling
-                lines.append(sf::Vertex(sf::Vector2f((float)x, (float)ceilingPixel), cell_color));
+                floorlines.append(sf::Vertex(sf::Vector2f((float)x, (float)ceilingPixel), cell_color));
                 ceilingPixel = int(-wallHeight * (1.0f - cameraHeight) + screenHeight * 0.5f);
-                lines.append(sf::Vertex(sf::Vector2f((float)x, (float)ceilingPixel), cell_color));
+                floorlines.append(sf::Vertex(sf::Vector2f((float)x, (float)ceilingPixel), cell_color));
 
                 tile = getTile(mapPos.x, mapPos.y);
             }
 
-            minilines.append(sf::Vertex(sf::Vector2f(12.5 + rayPos.x * 7.9, 12.5 + rayPos.y * 7.9)));
-            minilines.append(sf::Vertex(sf::Vector2f(12.5 + (rayPos.x + distance * rayDir.x) * 7.9, 12.5 + (rayPos.y + distance * rayDir.y) * 7.9)));
+            // add rays to map lines
+            maplines.append(sf::Vertex(sf::Vector2f(10 + (map_scale - 3) / 2 + rayPos.x * (map_scale - 0.1),
+                                                    10 + (map_scale - 3) / 2 + rayPos.y * (map_scale - 0.1)),
+                                       sf::Color::Green));
+            maplines.append(sf::Vertex(sf::Vector2f(10 + (map_scale - 3) / 2 + (rayPos.x + distance * rayDir.x) * (map_scale - 0.1),
+                                                    10 + (map_scale - 3) / 2 + (rayPos.y + distance * rayDir.y) * (map_scale - 0.1)),
+                                       sf::Color::White));
 
             // calculate lowest and highest pixel to fill in current line
             int drawStart = ceilingPixel;
@@ -337,35 +351,41 @@ int renderer()
                 color,
                 sf::Vector2f((float)texture_coords.x, (float)(texture_coords.y + texture_wall_size - 1))));
         }
+
+        // draw everything
         window.clear();
         window.draw(lines, state);
+        window.draw(floorlines);
+        window.draw(maplines);
+        window.draw(fpsText);
+        floorlines.clear();
+        maplines.clear();
 
         // draw minimap
         sf::RectangleShape rectangle;
-        rectangle.setSize(sf::Vector2f(8, 8));
+        rectangle.setSize(sf::Vector2f(map_scale, map_scale));
         rectangle.setFillColor(sf::Color::Black);
         for (int i = 0; i < mapHeight; i++)
         {
             for (int j = 0; j < mapWidth; j++)
             {
-                rectangle.setPosition(10 + j * 8, 10 + i * 8);
+                rectangle.setPosition(10 + j * map_scale, 10 + i * map_scale);
                 if (getTile(j, i) != '.')
                     window.draw(rectangle);
             }
         }
+
+        //draw player
         rectangle.setFillColor(sf::Color::White);
-        rectangle.setSize(sf::Vector2f(5, 5));
-        rectangle.setPosition(10 + position.x * 7.9, 10 + position.y * 7.9);
+        // not very accurate values but less of math
+        rectangle.setSize(sf::Vector2f((map_scale - 3), (map_scale - 3)));
+        rectangle.setPosition(10 + position.x * (map_scale - 0.1), 10 + position.y * (map_scale - 0.1));
         window.draw(rectangle);
 
-        window.draw(minilines);
-        minilines.clear();
-
-        window.draw(fpsText);
         frame_time_micro += clock.getElapsedTime().asMicroseconds();
         window.display();
     }
-
+    
     return EXIT_SUCCESS;
 }
 
