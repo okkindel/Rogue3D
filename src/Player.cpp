@@ -1,8 +1,8 @@
 #include "Player.h"
 
 sf::Vector2f position(15.5f, 16.5f); // coordinates in worldMap
-sf::Vector2f direction(0.0f, 1.0f);  // direction, relative to (0,0)
-sf::Vector2f plane(-0.66f, 0.0f);    // 2d raycaster version of the camera plane,
+sf::Vector2f direction(1.0f, 0.0f);  // direction, relative to (0,0)
+sf::Vector2f plane(0.0f, 0.66f);    // 2d raycaster version of the camera plane,
 
 // check if a rectangular thing with given size can move to given position without colliding with walls or
 // being outside of the map
