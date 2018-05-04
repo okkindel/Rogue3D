@@ -26,4 +26,7 @@ $(OBJ): %.o: %.cpp $(HEADERS)
 clean:
 	rm -rf $(OBJ)
 
+run: debug
+	./bin/debug
+
 .PHONY: all clean

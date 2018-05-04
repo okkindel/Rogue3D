@@ -1,8 +1,6 @@
 #include <stdio.h>
 #include <stdint.h>
-#include <math.h>
 #include <SFML/Graphics.hpp>
-#include "Player.h"
 #include "Engine.h"
 
 // time between FPS text refresh. FPS is smoothed out over this time
@@ -11,26 +9,22 @@ const float fps_refresh_time = 0.05;
 // colors
 const sf::Color transparent_white(255, 255, 255, 125);
 
-int renderer()
-{
+int draw() {
 
     // if the map is not correct, we can have segmentation faults. So check it.
-    if (!checkMap())
-    {
+    if (!checkMap()) {
         fprintf(stderr, "Map is invalid!\n");
         return EXIT_FAILURE;
     }
 
     sf::Font font;
-    if (!font.loadFromFile("data/font/opensans.ttf"))
-    {
+    if (!font.loadFromFile("data/font/opensans.ttf")) {
         fprintf(stderr, "Cannot open font!\n");
         return EXIT_FAILURE;
     }
 
     sf::Texture texture;
-    if (!texture.loadFromFile("data/texture/walls.png"))
-    {
+    if (!texture.loadFromFile("data/texture/walls.png")) {
         fprintf(stderr, "Cannot open texture!\n");
         return EXIT_FAILURE;
     }
@@ -54,15 +48,13 @@ int renderer()
     int frame_counter = 0;        // counts frames for FPS calculation
     int64_t frame_time_micro = 0; // time needed to draw frames in microseconds
 
-    while (window.isOpen())
-    {
+    while (window.isOpen()) {
         // get delta time
         float dt = clock.restart().asSeconds();
 
         // Update FPS, smoothed over time
-        if (dt_counter >= fps_refresh_time)
-        {
-            float fps = (float)frame_counter / dt_counter;
+        if (dt_counter >= fps_refresh_time) {
+            float fps = (float) frame_counter / dt_counter;
             frame_time_micro /= frame_counter;
             snprintf(frameInfoString, sizeof(frameInfoString), "FPS: %3.1f", fps);
             fpsText.setString(frameInfoString);
@@ -75,27 +67,24 @@ int renderer()
 
         // handle SFML events
         sf::Event event;
-        while (window.pollEvent(event))
-        {
-            switch (event.type)
-            {
-            case sf::Event::Closed:
-                window.close();
-                break;
-            case sf::Event::LostFocus:
-                hasFocus = false;
-                break;
-            case sf::Event::GainedFocus:
-                hasFocus = true;
-                break;
-            default:
-                break;
+        while (window.pollEvent(event)) {
+            switch (event.type) {
+                case sf::Event::Closed:
+                    window.close();
+                    break;
+                case sf::Event::LostFocus:
+                    hasFocus = false;
+                    break;
+                case sf::Event::GainedFocus:
+                    hasFocus = true;
+                    break;
+                default:
+                    break;
             }
         }
 
         // handle keyboard input
-        if (hasFocus)
-        {
+        if (hasFocus) {
             handleMove(dt);
         }
 
@@ -114,18 +103,13 @@ int renderer()
         // draw minimap
         sf::RectangleShape rectangle;
         rectangle.setSize(sf::Vector2f(map_scale, map_scale));
-        for (int i = 0; i < mapHeight; i++)
-        {
-            for (int j = 0; j < mapWidth; j++)
-            {
+        for (int i = 0; i < mapHeight; i++) {
+            for (int j = 0; j < mapWidth; j++) {
                 rectangle.setPosition(10 + j * map_scale, 10 + i * map_scale);
-                if (getTile(j, i) != '.')
-                {
+                if (getTile(j, i) != '.') {
                     rectangle.setFillColor(sf::Color::Black);
                     window.draw(rectangle);
-                }
-                else
-                {
+                } else {
                     rectangle.setFillColor(transparent_white);
                     window.draw(rectangle);
                 }
@@ -147,7 +131,6 @@ int renderer()
     return EXIT_SUCCESS;
 }
 
-int main()
-{
-    renderer();
+int main() {
+    draw();
 }
