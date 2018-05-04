@@ -7,6 +7,9 @@
 const int mapWidth = 32;
 const int mapHeight = 32;
 
+// minimap scale
+const int map_scale = 8;
+
 const char worldMap[] =
         "11111111111111111111111111111111"
         "1.1..1..3..3..1..11.1.11..11.1.1"

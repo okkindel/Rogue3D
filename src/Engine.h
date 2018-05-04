@@ -13,8 +13,6 @@ const float cameraHeight = 0.5f;
 const int texture_size = 512;
 // size of each wall type in the full texture
 const int texture_wall_size = 128;
-// minimap scale
-const int map_scale = 8;
 
 // colors
 const sf::Color color_brick(85, 55, 50);
