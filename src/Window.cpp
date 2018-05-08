@@ -34,7 +34,7 @@ void drawMinimap(sf::RenderWindow &window)
     }
 
     //draw player
-    rectangle.setFillColor(sf::Color::White);
+    rectangle.setFillColor(sf::Color::Magenta);
     // not very accurate values but less of math
     rectangle.setSize(sf::Vector2f((map_scale - 3), (map_scale - 3)));
     sf::Vector2f pos = getPosition();

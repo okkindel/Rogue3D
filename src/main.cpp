@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <SFML/Graphics.hpp>
-#include "Engine.h"
 #include "Window.h"
 
 // time between FPS text refresh. FPS is smoothed out over this time
@@ -37,7 +36,7 @@ int draw()
     sf::RenderWindow window(sf::VideoMode(screenWidth, screenHeight), "Roguelike");
     window.setSize(sf::Vector2u(screenWidth, screenHeight));
 
-    window.setFramerateLimit(60);
+    window.setFramerateLimit(1000);
     bool hasFocus = true;
 
     sf::Text fpsText("", font, 50); // text object for FPS counter
