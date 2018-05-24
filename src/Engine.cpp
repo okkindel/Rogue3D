@@ -171,6 +171,7 @@ void render()
         (color.g - (distance * 20)) > 0 ? color.g -= (distance * 20) : color.g = 0;
         (color.b - (distance * 20)) > 0 ? color.b -= (distance * 20) : color.b = 0;
 
+        // very basic dynamic ligthinig
         for (int i = -1; i < 2; i++)
         {
             for (int j = -1; j < 2; j++)
@@ -183,11 +184,21 @@ void render()
                         color.g += (distance * 5);
                         color.b += (distance * 3);
                     }
-                    else if (distance > 2)
+                    else if (distance > 2 && !(floor(i) == 1 && floor(j) == 1))
                     {
-                        color.r += (distance * 5);
-                        color.g += (distance * 4);
-                        color.b += (distance * 2);
+                        if (j == 1 || i == 1)
+                        {
+                            color.r += (distance * 6 * wall_x);
+                            color.g += (distance * 5 * wall_x);
+                            color.b += (distance * 3 * wall_x);
+                        }
+                        else
+                        {
+                            color.r += (distance * 6 * (1 - wall_x));
+                            color.g += (distance * 5 * (1 - wall_x));
+                            color.b += (distance * 3 * (1 - wall_x));
+                        }
+                        // std::cout << wall_x << "\n";
                     }
                 }
             }
