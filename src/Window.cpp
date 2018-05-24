@@ -2,7 +2,7 @@
 
 void drawLines(sf::RenderWindow &window, sf::RenderStates state)
 {
-    // draw walls
+    // draw walls, state - textures
     window.draw(getLines(), state);
     // draw ceiling and flooor
     window.draw(getFloorLines());

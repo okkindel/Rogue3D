@@ -2,6 +2,7 @@
 #define Player_hpp
 
 #include <SFML/Graphics.hpp>
+#include <math.h>
 #include "Map.h"
 
 const float collision_box = 0.375; // dimensions of player collision box, in tiles

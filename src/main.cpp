@@ -33,10 +33,10 @@ int draw()
     sf::RenderStates state(&texture);
 
     // create window
-    sf::RenderWindow window(sf::VideoMode(screenWidth, screenHeight), "Roguelike");
+    sf::RenderWindow window(sf::VideoMode(screenWidth, screenHeight), "Rogue 3D");
     window.setSize(sf::Vector2u(screenWidth, screenHeight));
 
-    window.setFramerateLimit(1000);
+    window.setFramerateLimit(1200);
     bool hasFocus = true;
 
     sf::Text fpsText("", font, 50); // text object for FPS counter
