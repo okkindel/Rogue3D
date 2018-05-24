@@ -1,5 +1,4 @@
 #include "Engine.h"
-#include <iostream>
 
 // lines used to draw walls on the screen
 sf::VertexArray lines(sf::Lines);
@@ -117,11 +116,9 @@ void render()
         // add rays to map lines
         maplines.append(sf::Vertex(sf::Vector2f(10 + (map_scale - 3) / 2 + rayPos.x * (map_scale - 0.1),
                                                 10 + (map_scale - 3) / 2 + rayPos.y * (map_scale - 0.1)),
-                                   sf::Color::Green));
-        maplines.append(
-            sf::Vertex(sf::Vector2f(10 + (map_scale - 3) / 2 + (rayPos.x + distance * rayDir.x) * (map_scale - 0.1),
-                                    10 + (map_scale - 3) / 2 +
-                                        (rayPos.y + distance * rayDir.y) * (map_scale - 0.1)),
+                                   sf::Color::Magenta));
+        maplines.append(sf::Vertex(sf::Vector2f(10 + (map_scale - 3) / 2 + (rayPos.x + distance * rayDir.x) * (map_scale - 0.1),
+                                    10 + (map_scale - 3) / 2 + (rayPos.y + distance * rayDir.y) * (map_scale - 0.1)),
                        sf::Color::Black));
 
         // calculate lowest and highest pixel to fill in current line
@@ -184,21 +181,11 @@ void render()
                         color.g += (distance * 5);
                         color.b += (distance * 3);
                     }
-                    else if (distance > 2 && !(floor(i) == 1 && floor(j) == 1))
+                    else
                     {
-                        if (j == 1 || i == 1)
-                        {
-                            color.r += (distance * 6 * wall_x);
-                            color.g += (distance * 5 * wall_x);
-                            color.b += (distance * 3 * wall_x);
-                        }
-                        else
-                        {
-                            color.r += (distance * 6 * (1 - wall_x));
-                            color.g += (distance * 5 * (1 - wall_x));
-                            color.b += (distance * 3 * (1 - wall_x));
-                        }
-                        // std::cout << wall_x << "\n";
+                        color.r += distance * 6 * ((j == 1 || i == 1) ? wall_x : (1 - wall_x));
+                        color.g += distance * 5 * ((j == 1 || i == 1) ? wall_x : (1 - wall_x));
+                        color.b += distance * 3 * ((j == 1 || i == 1) ? wall_x : (1 - wall_x));
                     }
                 }
             }

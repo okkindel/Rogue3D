@@ -84,7 +84,7 @@ enum class WallTexture
         Bush,
         Door,
         BigWall,
-        Light
+        Lamp
 };
 
 // valid wall types and their texture for the world map
@@ -93,7 +93,7 @@ const std::unordered_map<char, WallTexture> wallTypes{
     {'2', WallTexture::Bush},
     {'3', WallTexture::Door},
     {'4', WallTexture::BigWall},
-    {'5', WallTexture::Light},
+    {'5', WallTexture::Lamp},
 };
 
 char getTile(int, int);
