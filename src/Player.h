@@ -6,7 +6,7 @@
 #include "Map.h"
 
 const float collision_box = 0.375; // dimensions of player collision box, in tiles
-const float moveSpeed = 3.5;       // player movement speed in tiles per second
+const float moveSpeed = 4;       // player movement speed in tiles per second
 const float rotateSpeed = 2.0;     // player rotation speed in radians per second
 
 bool canMove(sf::Vector2f);

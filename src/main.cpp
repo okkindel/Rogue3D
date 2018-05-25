@@ -6,7 +6,7 @@
 // time between FPS text refresh. FPS is smoothed out over this time
 const float fps_refresh_time = 0.05;
 
-int draw()
+int init()
 {
     // if the map is not correct, we can have segmentation faults. So check it.
     if (!checkMap())
@@ -89,7 +89,10 @@ int draw()
 
         // handle keyboard input
         if (hasFocus)
+        {
             handleMove(dt);
+            handleKeys();
+        }
 
         // render the view
         render();
@@ -113,5 +116,5 @@ int draw()
 
 int main()
 {
-    draw();
+    init();
 }

@@ -1,4 +1,5 @@
 #include "Window.h"
+#include <iostream>
 
 void drawLines(sf::RenderWindow &window, sf::RenderStates state)
 {
@@ -40,4 +41,18 @@ void drawMinimap(sf::RenderWindow &window)
     sf::Vector2f pos = getPosition();
     rectangle.setPosition(10 + pos.x * (map_scale - 0.1), 10 + pos.y * (map_scale - 0.1));
     window.draw(rectangle);
+}
+
+void handleKeys()
+{
+    using kb = sf::Keyboard;
+    bool gamePaused = false;
+
+    if (kb::isKeyPressed(kb::Space))
+        gamePaused = !gamePaused;
+
+    if (gamePaused)
+    {
+        std::cout << "paused\n";
+    }
 }
