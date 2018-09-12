@@ -1,6 +1,6 @@
 # Rogue3D
 
-## A Raycaster written in C++ with SFML library.
+## A raycaster written in C++ with SFML library. In the future probably a roguelike game, if I will have enough patience and time.
 
 ## How to run it:
 
