@@ -1,5 +1,4 @@
 #include "Window.h"
-#include <iostream>
 
 void drawLines(sf::RenderWindow &window, sf::RenderStates state)
 {

@@ -1,6 +1,7 @@
 #ifndef Window_hpp
 #define Window_hpp
 #include <SFML/Graphics.hpp>
+#include <iostream>
 #include "Map.h"
 #include "Engine.h"
 

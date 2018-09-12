@@ -164,9 +164,9 @@ void render()
         }
 
         // dynamic shadows on the walls (more dark color on distance)
-        (color.r - (distance * 20)) > 0 ? color.r -= (distance * 20) : color.r = 0;
-        (color.g - (distance * 20)) > 0 ? color.g -= (distance * 20) : color.g = 0;
-        (color.b - (distance * 20)) > 0 ? color.b -= (distance * 20) : color.b = 0;
+        (color.r - (distance * 40)) > 0 ? color.r -= (distance * 40) : color.r = 0;
+        (color.g - (distance * 40)) > 0 ? color.g -= (distance * 40) : color.g = 0;
+        (color.b - (distance * 40)) > 0 ? color.b -= (distance * 40) : color.b = 0;
 
         // very basic dynamic ligthinig
         for (int i = -1; i < 2; i++)
