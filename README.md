@@ -23,7 +23,8 @@
 * Lightning (static at the moment)
 
 ## How does it look like:
-
+<p align="center"><img title="game screen" src="https://raw.githubusercontent.com/okkindel/Rogue3D/master/data/screen/1.png" width="60%"></p>
+<p align="center"><img title="game screen" src="https://raw.githubusercontent.com/okkindel/Rogue3D/master/data/screen/2.png" width="60%"></p>
 
 ## Todo:
 * 2D Sprites
